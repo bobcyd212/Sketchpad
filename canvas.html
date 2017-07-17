@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>画板Demo</title>
+	<style>
+        *{
+            margin:0;
+            padding:0;
+        }
+        body{
+            overflow: hidden;
+        }
+        .control{
+            position: fixed;
+            top: 0;
+            left:0;
+            width: 100%;
+            background: #eb9bb8;
+        }
+        .changeColor{
+            padding-left: 15px;
+            padding-top: 15px;
+            margin: 0 auto;
+            display: flex;
+            display: -webkit-flex;
+            justify-content: flex-start;
+        }
+        .changeColor > input{
+            width: 20px;
+            height: 20px;
+            margin: 0 15px;
+            vertical-align: middle
+        }
+        .changeColor > input:first-of-type{ background: #000; }
+        .changeColor > input:nth-of-type(2){ background: #f20e21; }
+        .changeColor > input:nth-of-type(3){ background: #f2f20e; }
+        .changeColor > input:nth-of-type(4){ background: #0afa2e; }
+        .clear >  input{
+            font-size: 14px;
+            padding: 3px;
+            background-color: #9bebae;
+            margin: 15px;
+            border-radius:4px;
+        }
+        #canvas{
+            display: block;
+            background: #f7fffe;
+        }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="control">
+    <div class="changeColor">
+      画笔颜色：
+      <input type="button">
+      <input type="button">
+      <input type="button">
+      <input type="button">
+    </div>
+    <div class="clear">
+      <input type="button" value="清空画布">
+      <input id="eraser" type="button" name="" value="橡皮擦">
+        <input id="save" type="button" value="保存图片">
+    </div> 
+  </div>
+  <canvas id="canvas"></canvas>
+  </div>
+  <script>
+   var canvas = document.querySelector('#canvas')
+   var clientWidth = document.documentElement.clientWidth
+   var clientHeight = document.documentElement.clientHeight
+   canvas.width = clientWidth
+   canvas.height = clientHeight
+   var context = canvas.getContext('2d')
+   var previousPoint
+   var penType = document.querySelectorAll('input')
+   var clearBtn = document.querySelector('#eraser')
+   clearBtn.addEventListener('click',function(e){
+     clearBtn.name ='eraser'
+   })
+	canvas.addEventListener('touchmove',function(e){
+      var clientX  = e.touches[0].clientX;
+      var clientY = e.touches[0].clientY;
+       if(clearBtn.name === 'eraser'){
+       context.clearRect(clientX - 5, clientY - 5, 10, 10)
+     }else{
+       if(previousPoint){
+             context.beginPath();
+             context.moveTo(previousPoint.clientX, previousPoint.clientY); 
+             context.lineTo(clientX,clientY); 
+             context.stroke()
+            }
+          previousPoint = {
+              "clientX":clientX,
+              "clientY":clientY
+       }
+     }
+     canvas.addEventListener('touchend',function(e){
+		 previousPoint = null
+     })
+    var btns = document.querySelectorAll('.changeColor input');
+         for (var i = 0; i < btns.length; i++) {
+             btns[i].onclick = changeColor;
+         }
+    function changeColor() { 
+      context.strokeStyle = getComputedStyle(this,null).backgroundColor
+    }
+  })
+   var clearAllBtn  = document.querySelector('.clear input');
+   clearAllBtn.onclick = function(){
+       context.clearRect(0,0,canvas.width,canvas.height)}
+   var save = document.querySelector('#save')
+   save.onclick = function(){
+       var c = document.getElementById('canvas')
+       var d = c.toDataURL('image/png')
+       var w = window.open('about:blank','image from canvas')
+       w.document.write("<img src='"+d+"'alt='from canvas'/>")
+      }
+  </script>
+</body>
+</html>
